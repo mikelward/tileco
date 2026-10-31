@@ -11,7 +11,7 @@ export const SETTINGS_KEY = "settings";
 // What follows you to every Chromebook, in storage.sync, and what each one
 // keeps for its own displays, in storage.local.
 export const SHARED = ["clocks", "day", "work", "apps", "dimStrength", "watched", "defaultMode", "modes"];
-export const PER_MACHINE = ["singleRules", "ultrawideAspect", "wheelStep"];
+export const PER_MACHINE = ["singleRules", "ultrawideAspect", "wheelStep", "startup"];
 
 export function pick(settings, keys) {
   return Object.fromEntries(keys.filter((k) => k in settings).map((k) => [k, settings[k]]));
@@ -39,6 +39,9 @@ export const DEFAULT_SETTINGS = {
   // The mouse wheel's step per click, re-applied from crosh at each login
   // (§19.2); null for no reminder.
   wheelStep: null,
+  // Web addresses opened at login, in order (§13.1). Per
+  // machine, as tide's startup.local.json is.
+  startup: [],
 };
 
 function checkClocks(clocks) {
@@ -144,6 +147,23 @@ function checkWatched(sites) {
   ];
 }
 
+function checkStartup(addresses) {
+  if (!Array.isArray(addresses)) throw new Error("must be a list");
+  const seen = new Set();
+  return addresses.map((a, i) => {
+    let url;
+    try {
+      url = new URL(typeof a === "string" ? a.trim() : a);
+    } catch {
+      throw new Error(`address ${i + 1}, "${a}", isn't a URL`);
+    }
+    if (url.protocol !== "https:" && url.protocol !== "http:") throw new Error(`address ${i + 1}, "${a}", must be a website`);
+    if (seen.has(url.href)) throw new Error(`address ${i + 1}, ${url.href}, is listed already`);
+    seen.add(url.href);
+    return url.href;
+  });
+}
+
 function checkWheelStep(step) {
   if (step === null) return null;
   if (typeof step !== "number" || !(step >= 1 && step <= 1000)) {
@@ -188,7 +208,7 @@ function checkModes(value, current) {
   return modes;
 }
 
-const CHECKS = { clocks: checkClocks, day: checkHours, work: checkHours, apps: checkApps, singleRules: checkSingleRules, ultrawideAspect: (a) => checkAspect(a), dimStrength: checkStrength, watched: checkWatched, defaultMode: checkDefaultMode, modes: checkModes, wheelStep: checkWheelStep };
+const CHECKS = { clocks: checkClocks, day: checkHours, work: checkHours, apps: checkApps, singleRules: checkSingleRules, ultrawideAspect: (a) => checkAspect(a), dimStrength: checkStrength, watched: checkWatched, defaultMode: checkDefaultMode, modes: checkModes, wheelStep: checkWheelStep, startup: checkStartup };
 
 // Settings from what's stored: `sync` then `local`, each an object or
 // undefined. Returns {settings, errors}, an error for each bad or unknown

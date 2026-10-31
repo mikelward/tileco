@@ -39,6 +39,7 @@ chrome.system.display.onDisplayChanged.addListener(changed);
 chrome.runtime.onStartup.addListener(() => {
   changed();
   watch();
+  tileco.startAtLogin().catch((e) => console.error("tileco: couldn't start the login list:", e));
   remind(chrome).catch((e) => console.error("tileco: couldn't open the mouse reminder:", e));
 });
 // A new install opens the settings, whose extras each need allowing (§14.1).

@@ -1009,3 +1009,43 @@ test("keep awake starts off in a new browser session", async () => {
   await again.command("keep-awake");
   assert.equal(chrome.awake, "display", "the first press turns it on");
 });
+
+test("at login, Start at login's addresses open in order, tiled and unfocused", async () => {
+  const { chrome, tileco } = await setup([HD], [on(HD, 1, { focused: true })]);
+  chrome.store.settings = { startup: ["https://mail.google.com/", "https://chat.google.com/"] };
+  await tileco.startAtLogin();
+  assert.deepEqual(opened(chrome), [
+    { url: "https://mail.google.com/", type: "popup" },
+    { url: "https://chat.google.com/", type: "popup" },
+  ]);
+  const [a, b] = chrome.created.filter((c) => c.url !== HOME).map((c) => c.id);
+  assert.deepEqual(tileco.state.workspaces[1].windows, [1, a, b], "they join the showing workspace's stack");
+  assert.ok(tileco.state.appPopups.includes(a) && tileco.state.appPopups.includes(b), "they tile as app windows");
+  assert.equal(chrome.win(1).focused, true, "none takes focus");
+  assert.equal(chrome.box(a).x > 0, true, "tiled beside the window you're in");
+});
+
+test("at login with nothing to start, nothing opens", async () => {
+  const { chrome, tileco } = await setup([HD], [on(HD, 1, { focused: true })]);
+  await tileco.startAtLogin();
+  assert.deepEqual(opened(chrome), []);
+});
+
+test("Start at login's windows don't take the places of windows Chrome restores", async () => {
+  const { chrome, tileco } = await setup([HD], [on(HD, 1, { focused: true, url: "https://mail.google.com/" })]);
+  await tileco.command("send-3");
+  chrome.store.settings = { startup: ["https://mail.google.com/"] };
+  // The browser restarts, and tileco starts its list before Chrome restores
+  // any window.
+  chrome.wins = [];
+  chrome.sessionStore = {};
+  const after = new Tileco(chrome);
+  await after.startAtLogin();
+  const started = chrome.created.at(-1).id;
+  assert.equal(after.state.windows[started].ws, 1, "the started window joins the showing workspace");
+  assert.equal(after.state.restoring[1].ws, 3, "Gmail's old window still waits");
+  chrome.open(on(HD, 50, { url: "https://mail.google.com/" }));
+  await after.event();
+  assert.equal(after.state.windows[50].ws, 3, "the restored window goes back to workspace 3");
+  assert.equal(after.state.windows[started].ws, 1);
+});
