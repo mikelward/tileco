@@ -108,3 +108,18 @@ export function items({ tabs = [], apps = [], commands = {}, workspaceOf = () =>
   }
   return out;
 }
+
+// The footer's key hints in `scope`, as [key, what it does], naming only the
+// keys that work there, as tide's switcher footer does (SPEC.md §9.4).
+// Without tab access the Tabs scope is one row, so there's nothing to choose.
+export function footerKeys(scope, { home, tabsAllowed }) {
+  const tabs = scope === "tabs";
+  const enter = !tabs ? "run" : tabsAllowed ? "go there" : "allow tab search";
+  return [["Enter", enter]]
+    .concat(tabs && !tabsAllowed ? [] : [["↑ ↓", "choose"]])
+    .concat([["Tab", `switch to ${tabs ? "Launch" : "Tabs"}`], ["Esc", home ? "clear" : "clear or close"]]);
+}
+
+export function footerText(keys) {
+  return keys.map(([key, does]) => `${key} to ${does}`).join(" · ");
+}

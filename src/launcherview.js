@@ -8,7 +8,7 @@ import { stepMonth } from "./calendar.js";
 import { renderClocks, renderDetail, today } from "./clockview.js";
 import { addDefaultSites, DISMISSED_KEY, EXTRAS, isOn } from "./extras.js";
 import { KEEP_AWAKE_KEY, isOn as keepingAwake, words as awakeWords } from "./keepawake.js";
-import { items, rank } from "./launcher.js";
+import { footerKeys, footerText, items, rank } from "./launcher.js";
 import { load as loadSettings, SETTINGS_KEY } from "./settings.js";
 
 const SYMBOLS = { tile: "[]=", threecol: "|M|", twocol: "||=", monocle: "[M]" };
@@ -122,6 +122,7 @@ function update() {
   for (const b of document.querySelectorAll(".scopes button")) {
     b.setAttribute("aria-selected", String(b.dataset.scope === scope));
   }
+  $("keys").textContent = footerText(footerKeys(scope, { home, tabsAllowed }));
   results.replaceChildren();
   shown.forEach((item, i) => {
     const li = document.createElement("li");
@@ -312,7 +313,6 @@ if (home) {
   detail.hidden = false;
   clocks.setAttribute("aria-expanded", "true");
 } else {
-  $("esc").textContent = "clear or close";
   // The dashboard is a glance: clicking away closes it.
   window.addEventListener("blur", () => {
     if (!asking) window.close();

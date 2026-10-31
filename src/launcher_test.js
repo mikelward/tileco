@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { fuzzyScore, items, rank } from "./launcher.js";
+import { footerKeys, footerText, fuzzyScore, items, rank } from "./launcher.js";
 
 test("a fuzzy match needs every query letter in order", () => {
   assert.equal(fuzzyScore("cal", "Google Calendar") > 0, true);
@@ -67,4 +67,27 @@ test("a tab on an app's site matches by the app's name", () => {
   const found = items({ tabs: [...tabs, week], apps: agenda });
   assert.deepEqual(rank("agenda", found, { scope: "tabs" }).map((i) => i.title), ["Week of October 19"]);
   assert.equal(found.find((i) => i.tabId === 20).app, null, "a site no app has");
+});
+
+// tide's switcher footer names only the keys that work on the tab you're on.
+test("the footer names only the keys that work in each scope", () => {
+  assert.deepEqual(footerKeys("launch", { home: true, tabsAllowed: true }), [
+    ["Enter", "run"],
+    ["↑ ↓", "choose"],
+    ["Tab", "switch to Tabs"],
+    ["Esc", "clear"],
+  ]);
+  assert.deepEqual(footerKeys("tabs", { home: false, tabsAllowed: true }), [
+    ["Enter", "go there"],
+    ["↑ ↓", "choose"],
+    ["Tab", "switch to Launch"],
+    ["Esc", "clear or close"],
+  ]);
+  // Without tab access the Tabs scope has one row, so nothing to choose.
+  assert.deepEqual(footerKeys("tabs", { home: false, tabsAllowed: false }), [
+    ["Enter", "allow tab search"],
+    ["Tab", "switch to Launch"],
+    ["Esc", "clear or close"],
+  ]);
+  assert.equal(footerText(footerKeys("launch", { home: true, tabsAllowed: true })), "Enter to run · ↑ ↓ to choose · Tab to switch to Tabs · Esc to clear");
 });
