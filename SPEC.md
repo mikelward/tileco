@@ -1023,7 +1023,8 @@ Crostini runs kitty, the shell config and the terminal tools, so `conf` and
   repainting what's already dimmed), this Chromebook's
   layouts (the ultrawide threshold and the lone-window widths, kept in
   `storage.local`), this Chromebook's mouse wheel step, for the login
-  reminder (§19.2), and import, export and reset of the shared settings.
+  reminder (§19.2), this Chromebook's Start at login list (below), and
+  import, export and reset of the shared settings.
   `src/settings.js` checks every value, and the dashboard and home page pick
   up a change at once through `storage.onChanged`; tileco reads its settings
   on each step. The workspaces page sets the layout a workspace starts in,
@@ -1031,6 +1032,35 @@ Crostini runs kitty, the shell config and the terminal tools, so `conf` and
   and main-window count, under tide's names (`defaultMode`, `modes`). A
   change reaches every workspace and replaces what the keys set there, as
   in tide.
+
+### 13.1 Start at login
+
+tide's Settings page of the same name runs commands once a login, and
+starts home's apps as programs or web addresses. An extension can't run a
+program, so tileco's list is web addresses alone.
+
+- **Start at login on this Chromebook** lists the websites tileco opens
+  each time you log in, in order. It's `startup` in `storage.local`, empty
+  by default, since a machine's list is its own, as tide's
+  `startup.local.json` is. It isn't in the JSON export, which is the
+  shared settings.
+- An address is typed and added with Enter, at the end. The arrows move
+  one, and × takes it out. One that isn't an `http` or `https` address,
+  or one listed already, is refused, and the page says why.
+- **At login**, chromeOS starts Chrome and tileco hears
+  `runtime.onStartup`. tileco then opens each address as an app key opens
+  its app (§9.1): an app-like `popup` window that tileco tiles as an app
+  window. They join the workspace showing on the focused display, else
+  the first, in the list's order, and none takes focus, as tide's
+  background launches don't.
+- They're tracked from the moment they open, so a Start at login window
+  never takes the place of a window Chrome is still restoring (§14.2).
+- Chrome may restore a window on the same site as well, which then shows
+  twice, as tide's web addresses do when Chrome reopens their windows
+  itself.
+- A window that can't open is logged and skipped, and the rest still
+  open.
+- A change takes effect at the next login. Nothing opens from the page.
 
 ## 14. The extension
 

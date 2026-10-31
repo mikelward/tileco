@@ -24,6 +24,16 @@ Guesses made on autopilot (2026-10-24), each cheap to undo.
   tileco's icon stays the toolbar button's and the store's. The
   alternative is a small copy of `icons/tileco.svg`. Reversible: the SVG
   in `src/launcher.html`.
+- **Start at login is per Chromebook, and websites only** (2026-10-31),
+  as tide's `startup.local.json` is per machine; an extension can't run a
+  program. The alternative is a synced list. Reversible: move `startup`
+  from `PER_MACHINE` to `SHARED` in `src/settings.js`.
+- **Start at login opens on the workspace you're on, and checks nothing
+  already open** (2026-10-31): tide opens home's apps on home, which
+  tileco hasn't got, and starts a web address whatever runs, so a site
+  Chrome restores itself shows twice. The alternatives are a workspace per
+  address, or skipping a site with a tab already open, which needs tab
+  access and races Chrome's restore. Reversible: `Tileco.startAtLogin`.
 - **The bar's middle stays a dead space** (2026-10-31): tileco's title
   does nothing on a click, so the room between the chips and the clocks
   isn't given to either; the clocks reach 7px left, half their own gap.

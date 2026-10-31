@@ -579,6 +579,30 @@ export class Tileco {
     return id;
   }
 
+  // At login (§13.1): each address on this Chromebook's list,
+  // in order, as an app window on the workspace showing where you are, as
+  // its app key would open it, but taking no focus. Tracked from the
+  // moment it opens, so it can't take the place of a window Chrome is still
+  // restoring (§14.2).
+  startAtLogin() {
+    return this.run(async () => {
+      await this.sync();
+      const addresses = this.settings.startup;
+      if (addresses.length === 0) return;
+      const display = this.focusedDisplay();
+      if (display === undefined) return;
+      for (const url of addresses) {
+        try {
+          await this.app({ url }, display, false);
+        } catch (e) {
+          // One that can't open mustn't keep the rest from starting.
+          console.error(`tileco: couldn't start ${url} at login:`, e);
+        }
+      }
+      await this.apply();
+    });
+  }
+
   async open(props, display) {
     const w = await this.api.windows.create({ focused: true, ...props });
     this.windows.set(w.id, w);
@@ -597,8 +621,8 @@ export class Tileco {
   // open their own windows, but there's no public way to launch one by
   // origin, so tileco opens the site in an app-like popup and tiles it as the
   // app's.
-  async app(app, display) {
-    const w = await this.open({ url: app.url, type: "popup" }, display);
+  async app(app, display, focused = true) {
+    const w = await this.open({ url: app.url, type: "popup", focused }, display);
     this.state.appPopups.push(w.id);
     return w.id;
   }

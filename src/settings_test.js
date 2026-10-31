@@ -102,7 +102,7 @@ test("layouts are set per Chromebook, and checked", () => {
 test("pick keeps the shared settings apart from this Chromebook's", () => {
   const all = resolve().settings;
   assert.deepEqual(Object.keys(pick(all, SHARED)), ["clocks", "day", "work", "apps", "dimStrength", "watched", "defaultMode", "modes"]);
-  assert.deepEqual(Object.keys(pick(all, PER_MACHINE)), ["singleRules", "ultrawideAspect", "wheelStep"]);
+  assert.deepEqual(Object.keys(pick(all, PER_MACHINE)), ["singleRules", "ultrawideAspect", "wheelStep", "startup"]);
 });
 
 test("a settings change applies at once, but tileco's own state writes don't count", () => {
@@ -150,4 +150,21 @@ test("the wheel step is off by default, and a step from 1 to 1000", () => {
     assert.equal(settings.wheelStep, null, String(bad));
     assert.match(errors[0], /^wheelStep: .* isn't a step from 1 to 1000/);
   }
+});
+
+test("Start at login is this Chromebook's list of web addresses", () => {
+  assert.ok(PER_MACHINE.includes("startup"));
+  assert.ok(!SHARED.includes("startup"));
+  assert.deepEqual(DEFAULT_SETTINGS.startup, []);
+  const { settings, errors } = resolve(undefined, { startup: [" https://mail.google.com ", "http://intranet.example/"] });
+  assert.deepEqual(errors, []);
+  assert.deepEqual(settings.startup, ["https://mail.google.com/", "http://intranet.example/"]);
+});
+
+test("Start at login refuses what isn't a web address, and repeats", () => {
+  const bad = (startup) => resolve(undefined, { startup }).errors;
+  assert.deepEqual(bad("https://mail.google.com/"), ["startup: must be a list"]);
+  assert.deepEqual(bad(["gmail"]), ['startup: address 1, "gmail", isn\'t a URL']);
+  assert.deepEqual(bad(["chrome://settings"]), ['startup: address 1, "chrome://settings", must be a website']);
+  assert.deepEqual(bad(["https://mail.google.com", "https://mail.google.com/"]), ["startup: address 2, https://mail.google.com/, is listed already"]);
 });

@@ -46,7 +46,7 @@ test("the options page renders every section and saves changes", async () => {
   const { page, errors } = await open("src/options.html");
   await page.waitForSelector("#setup li");
   const headings = await page.locator("h2").allInnerTexts();
-  for (const h of ["Extras", "Clocks", "Setup checklist", "Keys", "Apps", "Unread counts", "Dim", "Workspaces", "Layouts on this Chromebook", "Mouse on this Chromebook", "Import and export"]) {
+  for (const h of ["Extras", "Clocks", "Setup checklist", "Keys", "Apps", "Start at login on this Chromebook", "Unread counts", "Dim", "Workspaces", "Layouts on this Chromebook", "Mouse on this Chromebook", "Import and export"]) {
     assert.ok(headings.includes(h), `no ${h} section in ${headings}`);
   }
   assert.ok((await page.locator("#clocks tbody tr").count()) > 0, "no clocks");
@@ -70,6 +70,41 @@ test("the options page renders every section and saves changes", async () => {
 
   assert.deepEqual(errors, []);
   assert.equal(await page.locator("#errors").isHidden(), true, await page.locator("#errors").innerText());
+});
+
+test("Start at login keeps this Chromebook's websites, in order", async () => {
+  const { page, errors } = await open("src/options.html");
+  await page.waitForSelector("#setup li");
+  const add = async (site) => {
+    await page.locator("#startup-site").fill(site);
+    await page.locator("#startup-form button").click();
+  };
+  const stored = () => worker.evaluate(async () => (await chrome.storage.local.get("settings")).settings?.startup);
+  await add("https://mail.google.com");
+  await add("https://chat.google.com/");
+  await page.waitForFunction(() => document.querySelectorAll("#startup li").length === 2);
+  assert.deepEqual(await stored(), ["https://mail.google.com/", "https://chat.google.com/"]);
+  await page.locator('[aria-label="Move https://chat.google.com/ up"]').click();
+  await page.waitForFunction(async () => (await chrome.storage.local.get("settings")).settings?.startup?.[0] === "https://chat.google.com/");
+  // One listed already is refused, and the list stays as it was.
+  await add("https://mail.google.com/");
+  await page.waitForSelector("#errors:not([hidden])");
+  assert.match(await page.locator("#errors").innerText(), /listed already/);
+  assert.equal(await page.locator("#startup li").count(), 2);
+  // A removal refused because another of this Chromebook's fields is bad
+  // is put back, so fixing that field later doesn't save it unseen.
+  await page.locator("#wheel-step").fill("5000");
+  await page.locator('[aria-label="Don\'t open https://mail.google.com/ at login"]').click();
+  await page.waitForFunction(() => /wheelStep/.test(document.getElementById("errors").innerText));
+  assert.equal(await page.locator("#startup li").count(), 2, "the list shows what's saved");
+  await page.locator("#wheel-step").fill("");
+  await page.locator("#wheel-step").dispatchEvent("change");
+  await page.waitForFunction(() => document.getElementById("errors").hidden);
+  assert.deepEqual(await stored(), ["https://chat.google.com/", "https://mail.google.com/"]);
+  await page.locator('[aria-label="Don\'t open https://mail.google.com/ at login"]').click();
+  await page.waitForFunction(async () => (await chrome.storage.local.get("settings")).settings?.startup?.length === 1);
+  assert.deepEqual(errors, []);
+  await worker.evaluate(() => chrome.storage.local.remove("settings"));
 });
 
 test("the settings open pages in their own window", async () => {

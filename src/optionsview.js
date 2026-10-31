@@ -249,6 +249,43 @@ async function save(value = fromForm()) {
   return true;
 }
 
+// Start at login (§13.1): this Chromebook's list of websites, in order.
+let startupSites = [];
+
+function renderStartup() {
+  $("startup").replaceChildren(
+    ...startupSites.map((site, i) => {
+      const li = document.createElement("li");
+      const move = (by) => () => {
+        const j = i + by;
+        if (j < 0 || j >= startupSites.length) return;
+        const previous = [...startupSites];
+        [startupSites[i], startupSites[j]] = [startupSites[j], startupSites[i]];
+        saveStartup(previous);
+      };
+      li.append(
+        site,
+        " ",
+        button("↑", `Move ${site} up`, move(-1)),
+        button("↓", `Move ${site} down`, move(1)),
+        button("×", `Don't open ${site} at login`, () => {
+          const previous = [...startupSites];
+          startupSites = startupSites.filter((s) => s !== site);
+          saveStartup(previous);
+        }),
+      );
+      return li;
+    }),
+  );
+}
+
+// Saves the list, or says why not and puts back `previous`, the list as it
+// was, so a change refused here isn't saved later by another field's save.
+async function saveStartup(previous) {
+  if (!(await saveLocal())) startupSites = previous;
+  renderStartup();
+}
+
 // This Chromebook's layouts, kept apart from the shared settings.
 const ruleRows = $("rules").tBodies[0];
 
@@ -282,13 +319,15 @@ function layoutFromForm() {
   });
   // An empty step is no reminder, not an error.
   const wheelStep = $("wheel-step").value.trim() === "" ? null : num($("wheel-step"));
-  return { singleRules, ultrawideAspect: num($("ultrawide")), wheelStep };
+  return { singleRules, ultrawideAspect: num($("ultrawide")), wheelStep, startup: [...startupSites] };
 }
 
 function layoutToForm(settings) {
   ruleRows.replaceChildren(...settings.singleRules.map(ruleRow));
   $("ultrawide").value = settings.ultrawideAspect;
   $("wheel-step").value = settings.wheelStep ?? "";
+  startupSites = [...settings.startup];
+  renderStartup();
 }
 
 async function saveLocal() {
@@ -332,6 +371,18 @@ $("watch-form").addEventListener("submit", async (e) => {
     $("watch-site").value = "";
     renderWatched();
   }
+});
+
+$("startup-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const previous = [...startupSites];
+  startupSites.push($("startup-site").value.trim());
+  if (await saveLocal()) {
+    $("startup-site").value = "";
+    // As the settings keep it, so the list shows what will open.
+    startupSites = resolve(undefined, layoutFromForm()).settings.startup;
+    renderStartup();
+  } else startupSites = previous;
 });
 
 $("import").addEventListener("click", async () => {
