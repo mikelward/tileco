@@ -203,6 +203,15 @@ test("the bar's cup turns keep awake on and off, and says which", async () => {
   assert.deepEqual(errors, []);
 });
 
+test("the footer names only the keys that work in each scope", async () => {
+  const { page, errors } = await open("src/launcher.html?mode=dashboard");
+  await page.waitForSelector("#results li");
+  assert.equal(await page.locator("#keys").innerText(), "Enter to run · ↑ ↓ to choose · Tab to switch to Tabs · Esc to clear or close");
+  await page.locator('.scopes [data-scope="tabs"]').click();
+  assert.equal(await page.locator("#keys").innerText(), "Enter to allow tab search · Tab to switch to Launch · Esc to clear or close");
+  assert.deepEqual(errors, []);
+});
+
 test("without tab access, the dashboard opens on Launch and offers tab search", async () => {
   const { page, errors } = await open("src/launcher.html?mode=dashboard");
   await page.waitForSelector("#results li");
@@ -241,7 +250,7 @@ test("the dashboard's footer lines up, and its Settings button opens the setting
   await page.goto(base + "src/launcher.html?mode=dashboard");
   await page.waitForSelector("#clocks li");
   const middle = (sel) => page.locator(sel).evaluate((e) => { const r = e.getBoundingClientRect(); return r.top + r.height / 2; });
-  const text = await middle(".hint > span");
+  const text = await middle("#keys");
   for (const sel of ["#open-settings"]) assert.ok(Math.abs((await middle(sel)) - text) < 1, `${sel} isn't level with the hint`);
   await page.locator("#open-settings").click();
   await page.waitForFunction(() => window.optionsOpened === 1);

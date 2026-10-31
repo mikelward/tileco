@@ -849,6 +849,10 @@ tabs and running tileco's commands.
   (§6.1 Activate); an app or command runs as its key would, so an app
   opens a new window (§9.1). Arrows choose,
   Esc clears, then closes the dashboard.
+- **The footer** names only the keys that work in the scope you're in, as
+  tide's switcher footer does: Enter to run on Launch, to go there on
+  Tabs, and to allow tab search on Tabs without it, where there's one row
+  and so no arrows; Tab names the scope it switches to.
 
 It only opens from a Chrome window or an empty workspace (§2.2): over an
 Android or Linux app, tap Search for the native launcher instead.
