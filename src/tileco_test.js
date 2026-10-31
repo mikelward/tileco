@@ -985,3 +985,27 @@ test("without tab search, no tab addresses are kept, even with all sites allowed
   await tileco.event();
   assert.deepEqual(chrome.store.state.windows[1].urls, ["https://mail.google.com/"], "kept once tab search is allowed");
 });
+
+test("Search+S keeps the display awake until it's pressed again", async () => {
+  const { chrome, tileco } = await setup([HD], [on(HD, 1, { focused: true })]);
+  assert.equal(chrome.awake, null, "nothing held at login");
+  await tileco.command("keep-awake");
+  assert.equal(chrome.awake, "display");
+  assert.equal(chrome.sessionStore.keepAwake, true, "the dashboard reads it from storage.session");
+  assert.equal(chrome.actionTitle, "tileco · Keeping awake");
+  await tileco.command("keep-awake");
+  assert.equal(chrome.awake, null);
+  assert.equal(chrome.sessionStore.keepAwake, false);
+  assert.equal(chrome.actionTitle, "tileco · Not keeping awake");
+});
+
+test("keep awake starts off in a new browser session", async () => {
+  const { chrome, tileco } = await setup([HD], [on(HD, 1, { focused: true })]);
+  await tileco.command("keep-awake");
+  // A restart releases Chrome's request and empties storage.session together.
+  chrome.awake = null;
+  chrome.sessionStore = {};
+  const again = new Tileco(chrome);
+  await again.command("keep-awake");
+  assert.equal(chrome.awake, "display", "the first press turns it on");
+});

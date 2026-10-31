@@ -7,6 +7,7 @@ import { scrub } from "./clocks.js";
 import { stepMonth } from "./calendar.js";
 import { renderClocks, renderDetail, today } from "./clockview.js";
 import { addDefaultSites, DISMISSED_KEY, EXTRAS, isOn } from "./extras.js";
+import { KEEP_AWAKE_KEY, isOn as keepingAwake, words as awakeWords } from "./keepawake.js";
 import { items, rank } from "./launcher.js";
 import { load as loadSettings, SETTINGS_KEY } from "./settings.js";
 
@@ -71,6 +72,18 @@ function renderBar() {
   nav.append(layout);
   $("title").textContent = here?.workspace ? `Workspace ${here.workspace}${home ? " · empty" : ""}` : "";
 }
+
+// Keep awake's cup (§11): faint while off, in the accent color while on, and
+// hovering says which. A click turns it over and leaves the page open.
+const cup = $("keep-awake");
+async function renderCup() {
+  const on = await keepingAwake(chrome.storage);
+  cup.setAttribute("aria-pressed", String(on));
+  cup.title = awakeWords(on);
+}
+cup.addEventListener("click", () =>
+  chrome.runtime.sendMessage({ command: "keep-awake" }).catch((e) => console.error("tileco: couldn't turn keep awake over:", e)),
+);
 
 async function refresh() {
   me = await chrome.windows.getCurrent();
@@ -306,7 +319,11 @@ if (home) {
   });
 }
 
-chrome.storage.onChanged.addListener((changes) => {
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "session") {
+    if (changes[KEEP_AWAKE_KEY]) renderCup();
+    return;
+  }
   if (changes.view || changes.state) refresh();
   if (changes[SETTINGS_KEY]) {
     renderExtras();
@@ -320,6 +337,7 @@ window.addEventListener("focus", () => {
   query.focus();
 });
 refresh();
+renderCup();
 renderExtras();
 loadClocks();
 setInterval(renderTime, 10000);

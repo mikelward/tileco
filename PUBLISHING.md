@@ -115,6 +115,8 @@ In the [developer dashboard](https://chrome.google.com/webstore/devconsole):
      - `system.display`: each display's work area, to lay out windows.
      - `scripting`: the unread-count script on sites you allow, and the
        shade that dims inactive windows.
+     - `power`: keep awake, which holds the display on while you've
+       turned it on, until you turn it off or the browser restarts.
      - Optional `tabs`: tab titles and URLs, for the launcher's tab search,
        for matching windows after a restart, and for recognizing Secure
        Shell's windows. Asked for only when you allow tab search.

@@ -84,6 +84,7 @@ nav button {
    Only top, bottom, left and right place them, so a page can set them
    otherwise. */
 nav button,
+#keep-awake,
 #clocks,
 .scopes button {
   position: relative;
@@ -91,6 +92,8 @@ nav button,
 }
 nav button::before,
 nav button::after,
+#keep-awake::before,
+#keep-awake::after,
 #clocks::before,
 #clocks::after,
 .scopes button::before,
@@ -100,6 +103,7 @@ nav button::after,
   z-index: -1;
 }
 nav button::after,
+#keep-awake::after,
 #clocks::after {
   border-radius: 6px;
   pointer-events: none;
@@ -140,6 +144,7 @@ nav button:first-child::after {
   right: -3px;
 }
 nav button:hover::after,
+#keep-awake:hover::after,
 #clocks:hover::after,
 .scopes button:hover::after {
   background: var(--hover);
@@ -163,6 +168,35 @@ nav button.current {
   margin-left: 8px;
   font-family: "Ubuntu Mono", ui-monospace, monospace;
   color: var(--muted);
+}
+/* Keep awake's cup, the bar's one status icon, 10px from the clocks as
+   tide's last status icon is (tide §7.4): faint while off, accent while on.
+   Its target runs the bar's height and out to the clocks' own. */
+#keep-awake {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  margin: 0 10px 0 auto;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--muted);
+  opacity: 0.5;
+  cursor: pointer;
+}
+#keep-awake[aria-pressed="true"] {
+  color: var(--accent);
+  opacity: 1;
+}
+#keep-awake::before,
+#keep-awake::after {
+  top: -5px;
+  bottom: -5px;
+  left: -4px;
+  right: -3px;
 }
 #clocks {
   display: flex;

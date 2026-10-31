@@ -4,6 +4,21 @@
 
 Guesses made on autopilot (2026-10-24), each cheap to undo.
 
+- **Keep awake is `Search+S`** (2026-10-31), as tide's and tilemo's
+  `Super+S`, though chromeOS has select to speak there, and whether the
+  Shortcuts app can remove it is untried. The alternative is `Search+P`,
+  free, which tide gave presenter mode. Reversible: the command's
+  description in `manifest.json`; Chrome binds no key for it either way.
+- **`Search+S` shows nothing but the cup and the toolbar tooltip**
+  (2026-10-31): tide's OSD has no equivalent, and a notification would
+  cost the `notifications` permission's install warning, which disables an
+  installed tileco until the warning is accepted. The alternative is that
+  notification, or flashing the toolbar badge. Reversible: `toggle` in
+  `src/keepawake.js`.
+- **No presenter mode** (2026-10-31): tide's `Super+P` is keep awake plus
+  Do not disturb, and an extension can't reach chromeOS's Do not disturb.
+  The alternative is a presenter command that holds keep awake alone, as
+  tide does without its notification server. Reversible: a command.
 - **The bar's middle stays a dead space** (2026-10-31): tileco's title
   does nothing on a click, so the room between the chips and the clocks
   isn't given to either; the clocks reach 7px left, half their own gap.

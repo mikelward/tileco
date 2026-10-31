@@ -76,7 +76,8 @@ test("frequent actions take no modifier but Search, and no two commands share a 
 // Tiling needs no permission with an install warning; tab access and each
 // site's are asked for on the options page (§14.1).
 test("every permission with an install warning is optional", () => {
-  assert.deepEqual(manifest.permissions, ["storage", "system.display", "scripting"]);
+  // power has no install warning, so keep awake (§11) needs no prompt.
+  assert.deepEqual(manifest.permissions, ["storage", "system.display", "scripting", "power"]);
   assert.deepEqual(manifest.optional_permissions, ["tabs"]);
   assert.equal(manifest.content_scripts, undefined, "the title watcher is registered once its sites are allowed");
   assert.equal(manifest.host_permissions, undefined);
@@ -125,7 +126,7 @@ test("every command in the manifest does something", async () => {
     chrome.updates.length = 0;
     await tileco.command(name);
     const after = JSON.stringify([tileco.state, chrome.wins]);
-    const acted = before !== after || chrome.updates.some((u) => u.focused);
+    const acted = before !== after || chrome.updates.some((u) => u.focused) || chrome.awake !== null;
     assert.ok(acted, `${name} changed nothing`);
   }
 });
