@@ -8,6 +8,8 @@ export class FakeChrome {
     this.wins = windows.map((w) => ({ type: "normal", state: "normal", focused: false, alwaysOnTop: false, ...w }));
     this.store = {};
     this.syncStore = {};
+    // storage.session, which a browser restart empties.
+    this.sessionStore = {};
     this.updates = [];
     this.refuse = new Set();
     this.created = [];
@@ -23,6 +25,12 @@ export class FakeChrome {
       },
       sync: {
         get: async (key) => (key in fake.syncStore ? { [key]: structuredClone(fake.syncStore[key]) } : {}),
+      },
+      session: {
+        get: async (key) => (key in fake.sessionStore ? { [key]: structuredClone(fake.sessionStore[key]) } : {}),
+        set: async (items) => {
+          for (const [k, v] of Object.entries(items)) fake.sessionStore[k] = structuredClone(v);
+        },
       },
     };
     this.windows = {

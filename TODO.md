@@ -104,6 +104,14 @@ Guesses made on autopilot (2026-10-24), each cheap to undo.
   snapshot on each sync until the first command, which deletes the class.
   To decide after trying restarts on a device. Reversible: `Tileco.restarted`.
 
+- **A restart with no window yet is told from closing them all by
+  `chrome.storage.session`** (2026-10-31): a flag set at the first window
+  each browser session; a browser restart empties it. Reloading or updating
+  tileco empties it too, so a reload with no Chrome window open keeps the
+  old places waiting until your first command. The alternative is
+  `runtime.onStartup`, which can arrive after the first window event.
+  Reversible: `SEEN_KEY` in `src/tileco.js`.
+
 ## Later
 
 - **Set the PRO 2 LIGHTSPEED's DPI from Linux** (SPEC.md §19.2, fix 1).
@@ -137,9 +145,6 @@ Guesses made on autopilot (2026-10-24), each cheap to undo.
   Until then: a DPI button under the mouse, if it has one, steps through
   the profile's 400–6400; or G HUB once on Windows or a Mac.
 
-- If the service worker syncs before Chrome has restored any window after a
-  restart, nothing matches and the old places are lost; keeping them
-  waiting then would also catch "closed every window" (SPEC.md §14.2).
 - Frame offsets (SPEC.md §5.3): tiles use the bounds as given; measuring
   and correcting each window type's frame waits for a device.
 - Profile keys (SPEC.md §9.2).
