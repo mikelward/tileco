@@ -19,6 +19,11 @@ Guesses made on autopilot (2026-10-24), each cheap to undo.
   Do not disturb, and an extension can't reach chromeOS's Do not disturb.
   The alternative is a presenter command that holds keep awake alone, as
   tide does without its notification server. Reversible: a command.
+- **The bar's logo is tide's two waves, not tileco's own icon**
+  (2026-10-31), so the bar reads the same on tide, tilemo and tileco;
+  tileco's icon stays the toolbar button's and the store's. The
+  alternative is a small copy of `icons/tileco.svg`. Reversible: the SVG
+  in `src/launcher.html`.
 - **The bar's middle stays a dead space** (2026-10-31): tileco's title
   does nothing on a click, so the room between the chips and the clocks
   isn't given to either; the clocks reach 7px left, half their own gap.

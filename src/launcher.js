@@ -123,3 +123,10 @@ export function footerKeys(scope, { home, tabsAllowed }) {
 export function footerText(keys) {
   return keys.map(([key, does]) => `${key} to ${does}`).join(" · ");
 }
+
+// What a tap on the bar's logo does (§8.1): the dashboard is the open
+// launcher, so it closes; the home page's launcher can't, so it goes back to
+// Launch, ready to type.
+export function logoTapped({ home }) {
+  return home ? "launch" : "close";
+}

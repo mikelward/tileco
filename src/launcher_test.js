@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { footerKeys, footerText, fuzzyScore, items, rank } from "./launcher.js";
+import { footerKeys, footerText, fuzzyScore, items, logoTapped, rank } from "./launcher.js";
 
 test("a fuzzy match needs every query letter in order", () => {
   assert.equal(fuzzyScore("cal", "Google Calendar") > 0, true);
@@ -90,4 +90,10 @@ test("the footer names only the keys that work in each scope", () => {
     ["Esc", "clear or close"],
   ]);
   assert.equal(footerText(footerKeys("launch", { home: true, tabsAllowed: true })), "Enter to run · ↑ ↓ to choose · Tab to switch to Tabs · Esc to clear");
+});
+
+// tide's wave logo opens the launcher, or closes it where it's open.
+test("a tap on the logo closes the dashboard and brings home's launcher to Launch", () => {
+  assert.equal(logoTapped({ home: false }), "close");
+  assert.equal(logoTapped({ home: true }), "launch");
 });
