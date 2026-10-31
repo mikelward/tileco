@@ -43,8 +43,8 @@ body {
   font: 14px/1.4 Inter, system-ui, sans-serif;
 }
 
-/* tide's bar: workspaces and layout left, the workspace in the middle,
-   clocks right. */
+/* tide's bar: the logo, workspaces and layout left, the workspace in the
+   middle, clocks right. */
 .bar {
   position: relative;
   display: flex;
@@ -60,6 +60,26 @@ body {
   left: 50%;
   transform: translateX(-50%);
   color: var(--muted);
+}
+/* tide's wave logo, first on the left: the icon 12px from the bar's edge
+   and 8px from the first workspace, in the accent blue. */
+#logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 26px;
+  margin: 0 0 0 -2px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+/* The cup's auto margin pushes it and the clocks right. */
+#logo + nav {
+  margin-left: 4px;
 }
 nav {
   display: flex;
@@ -83,6 +103,7 @@ nav button {
    pressed; it takes no clicks, so the rounding leaves no dead corners.
    Only top, bottom, left and right place them, so a page can set them
    otherwise. */
+#logo,
 nav button,
 #keep-awake,
 #clocks,
@@ -90,6 +111,8 @@ nav button,
   position: relative;
   z-index: 0;
 }
+#logo::before,
+#logo::after,
 nav button::before,
 nav button::after,
 #keep-awake::before,
@@ -102,6 +125,7 @@ nav button::after,
   position: absolute;
   z-index: -1;
 }
+#logo::after,
 nav button::after,
 #keep-awake::after,
 #clocks::after {
@@ -125,6 +149,19 @@ nav button:first-child::before,
 nav button:first-child::after {
   left: -11px;
 }
+/* After the logo, whose target runs out to the bar's left edge and meets
+   the first chip's halfway. */
+#logo::before,
+#logo::after {
+  top: -5px;
+  bottom: -5px;
+  left: -8px;
+  right: -2px;
+}
+#logo + nav button:first-child::before,
+#logo + nav button:first-child::after {
+  left: -3px;
+}
 /* The clocks, every zone's name and time and the gaps between them, are one
    target: the bar's height, out to its right edge, and half their own gap
    to the left. */
@@ -143,6 +180,7 @@ nav button:first-child::after {
   left: -3px;
   right: -3px;
 }
+#logo:hover::after,
 nav button:hover::after,
 #keep-awake:hover::after,
 #clocks:hover::after,

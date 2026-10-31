@@ -8,7 +8,7 @@ import { stepMonth } from "./calendar.js";
 import { renderClocks, renderDetail, today } from "./clockview.js";
 import { addDefaultSites, DISMISSED_KEY, EXTRAS, isOn } from "./extras.js";
 import { KEEP_AWAKE_KEY, isOn as keepingAwake, words as awakeWords } from "./keepawake.js";
-import { footerKeys, footerText, items, rank } from "./launcher.js";
+import { footerKeys, footerText, items, logoTapped, rank } from "./launcher.js";
 import { load as loadSettings, SETTINGS_KEY } from "./settings.js";
 
 const SYMBOLS = { tile: "[]=", threecol: "|M|", twocol: "||=", monocle: "[M]" };
@@ -192,6 +192,15 @@ document.addEventListener("keydown", (e) => {
   else query.focus();
 });
 for (const b of document.querySelectorAll(".scopes button")) b.addEventListener("click", () => setScope(b.dataset.scope));
+// tide's wave logo (§8.1): the dashboard is the open launcher, so a tap
+// closes it, as its key does; the home page's goes back to Launch.
+$("logo").addEventListener("click", () => {
+  if (logoTapped({ home }) === "close") window.close();
+  else {
+    query.value = "";
+    setScope("launch");
+  }
+});
 
 // The clocks: the home page shows each zone's day; the dashboard opens it on
 // a click. Scrolling over them scrubs time until the pointer leaves (§8.2).

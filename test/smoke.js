@@ -120,9 +120,9 @@ for (const mode of ["home", "dashboard"]) {
   });
 }
 
-// Every point of the bar's chips and clocks, top to bottom, reaches one of
-// them: none lands on the bar between or around them.
-test("a click anywhere on the bar's chips or clocks reaches one", async () => {
+// Every point of the bar's logo, chips and clocks, top to bottom, reaches
+// one of them: none lands on the bar between or around them.
+test("a click anywhere on the bar's logo, chips or clocks reaches one", async () => {
   const { page, errors } = await open("src/launcher.html?mode=dashboard");
   await page.waitForSelector("#clocks li");
   await page.waitForSelector("#workspaces button");
@@ -131,7 +131,7 @@ test("a click anywhere on the bar's chips or clocks reaches one", async () => {
     const clocks = document.getElementById("clocks");
     const bar = document.querySelector(".bar").getBoundingClientRect();
     const spans = [
-      [bar.left, chips[chips.length - 1].getBoundingClientRect().right, (e) => e.closest("#workspaces button")],
+      [bar.left, chips[chips.length - 1].getBoundingClientRect().right, (e) => e.closest("#logo, #workspaces button")],
       [clocks.getBoundingClientRect().left, bar.right, (e) => e.closest("#clocks")],
     ];
     const out = [];
@@ -152,21 +152,21 @@ test("a click anywhere on the bar's chips or clocks reaches one", async () => {
     return out;
   });
   assert.deepEqual(dead.slice(0, 10), [], `${dead.length} dead points`);
-  // Under the pointer, even at the bar's corner outside the chip itself,
-  // the chip's whole target shows, and still takes the click there.
+  // Under the pointer, even at the bar's corner outside the logo itself,
+  // the logo's whole target shows, and still takes the click there.
   await page.mouse.move(0, 0);
   const first = await page.evaluate(() => {
-    const chip = document.querySelector("#workspaces button");
-    const shown = getComputedStyle(chip, "::after");
+    const logo = document.getElementById("logo");
+    const shown = getComputedStyle(logo, "::after");
     return {
       background: shown.backgroundColor,
       top: shown.top,
       left: shown.left,
-      corner: document.elementFromPoint(0, 0)?.closest("#workspaces button") === chip,
+      corner: document.elementFromPoint(0, 0)?.closest("#logo") === logo,
     };
   });
   assert.notEqual(first.background, "rgba(0, 0, 0, 0)", "no hover shown");
-  assert.deepEqual([first.top, first.left], ["-6px", "-11px"], "the whole target, not the chip");
+  assert.deepEqual([first.top, first.left], ["-5px", "-8px"], "the whole target, not the logo");
   assert.ok(first.corner, "hovering rounds the shape but loses no clicks");
   // Above the clocks' line of text, in their target.
   const row = await page.locator("#clocks").boundingBox();
@@ -201,6 +201,26 @@ test("the bar's cup turns keep awake on and off, and says which", async () => {
   await cup.click();
   await page.waitForFunction(() => document.getElementById("keep-awake").getAttribute("aria-pressed") === "false");
   assert.deepEqual(errors, []);
+});
+
+test("the logo closes the dashboard, and takes home's launcher back to Launch", async () => {
+  const { page, errors } = await open("src/launcher.html?mode=dashboard");
+  await page.waitForSelector("#clocks li");
+  await page.evaluate(() => {
+    window.closes = 0;
+    window.close = () => window.closes++;
+  });
+  await page.locator("#logo").click();
+  assert.equal(await page.evaluate(() => window.closes), 1);
+  const home = await open("src/launcher.html?mode=home");
+  await home.page.waitForSelector("#clocks li");
+  await home.page.locator('.scopes [data-scope="tabs"]').click();
+  await home.page.locator("#query").fill("x");
+  await home.page.locator("#logo").click();
+  assert.equal(await home.page.locator('.scopes [aria-selected="true"]').innerText(), "Launch");
+  assert.equal(await home.page.locator("#query").inputValue(), "");
+  assert.ok(await home.page.evaluate(() => document.activeElement?.id === "query"), "ready to type");
+  assert.deepEqual([...errors, ...home.errors], []);
 });
 
 test("the footer names only the keys that work in each scope", async () => {

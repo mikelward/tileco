@@ -507,8 +507,8 @@ workspace would strand you: no window, no keys. tileco opens its **home
 page** there instead: an extension page in a `popup` window, opened on that
 display and then made full screen. It shows:
 
-- tide's bar across the top: workspaces, layout, the workspace number and
-  the clocks (§8.1);
+- tide's bar across the top: tide's wave logo, workspaces, layout, the
+  workspace number and the clocks (§8.1);
 - the launcher (§9.4), focused on its **Launch** scope, ready to type;
 - every zone's day, the next clock change and a month calendar (§8.2).
 
@@ -718,8 +718,9 @@ Instead:
   windows, which have no toolbar.
 - **tileco's dashboard**, from `Search+Space` or the toolbar icon, is the home
   page's sibling (§6.2), full screen over the focused display: tide's bar on
-  top (workspaces in tide's style — current, occupied, urgent, empty — the
-  layout symbol, keep awake's cup (§11) and the clocks) and the launcher (§9.4), opening on its
+  top (tide's wave logo, workspaces in tide's style — current, occupied,
+  urgent, empty — the layout symbol, keep awake's cup (§11) and the
+  clocks) and the launcher (§9.4), opening on its
   **Tabs** scope for switching. It closes once you choose, on Esc, when you
   click away, or on its key again. It doesn't use Chrome's action popup,
   which is small, anchored to the toolbar and refused where there's no
@@ -727,9 +728,16 @@ Instead:
   `extension_action_api.cc` `OpenPopupInBrowser`). If chromeOS's full-screen
   bubble shows on every open, the dashboard falls back to a large centered
   window *(unverified)*.
-- **No dead clicks in the bar.** Each workspace chip's click target reaches
-  the bar's top and bottom and halfway to the next chip, the first to the
-  bar's left edge. The clocks are one target, every zone's name and time
+- **The logo** is first on the left, as on tide's bar: tide's two waves
+  in the accent blue, the icon 12px from the bar's edge and 8px from the
+  first workspace. A tap on the dashboard's closes it, as its key does,
+  since tide's logo closes an open launcher; on the home page, whose
+  launcher is always there, it goes back to **Launch** with an empty
+  query, ready to type.
+- **No dead clicks in the bar.** The logo's click target reaches the
+  bar's left edge, top and bottom, and halfway to the first workspace
+  chip. Each chip's reaches the bar's top and bottom and halfway to the
+  next chip. The clocks are one target, every zone's name and time
   and the gaps between them, the bar's height and out to its right edge.
   The launcher's scope chips meet halfway too. Under the pointer, an
   item's whole target shows as a rounded rect a shade darker than the bar
