@@ -30,6 +30,9 @@ function managed(w, appPopups, refused) {
 }
 const STATE_KEY = "state";
 const VIEW_KEY = "view";
+// In storage.session, which a browser restart empties: whether this browser
+// session has had a window yet.
+const SEEN_KEY = "seenWindow";
 export const DIM_ORIGINS = ["<all_urls>"];
 const BADGE = "#3584e4";
 const BADGE_ATTENTION = "#e5a50a";
@@ -190,9 +193,14 @@ export class Tileco {
     // Every window type, so a focused popup or devtools window still says
     // which display you're on, but only managed ones are tracked.
     const all = await this.api.windows.getAll({ populate: true, windowTypes: [...MANAGED, "popup", "devtools"] });
+    this.seenWindow ??= Boolean((await this.api.storage.session.get(SEEN_KEY))[SEEN_KEY]);
     // The state as the last step left the screen, before displays changed,
     // with windows renamed if the browser restarted.
     const { state: before, renamed, waiting } = this.restarted(this.state, all);
+    if (all.length > 0 && !this.seenWindow) {
+      await this.api.storage.session.set({ [SEEN_KEY]: true });
+      this.seenWindow = true;
+    }
     let s = before ? ws.setDisplays(before, ids) : ws.create(ids);
     // Workspaces from before this setting existed began with the defaults.
     const modes = { ...ws.DEFAULT_MODE_SETTINGS, ...this.settings.modes };
@@ -318,9 +326,11 @@ export class Tileco {
       const current = candidates.filter((w) => w.type === type).map((w) => ({ id: w.id, urls: this.urlsOf(w) }));
       for (const [from, to] of matchWindows(old, current)) renames.set(from, to);
     }
-    // A window that matches nothing doesn't end the wait for the rest; with
-    // no window at all, you may have closed them all, so nothing waits.
-    if (renames.size === 0 && !stored.restoring && all.length === 0) return none;
+    // A window that matches nothing doesn't end the wait for the rest. No
+    // window at all is the browser starting before Chrome restores any, or,
+    // once this browser session has had one, you closing them all, when
+    // nothing waits.
+    if (renames.size === 0 && !stored.restoring && all.length === 0 && this.seenWindow) return none;
     state = ws.renameWindows(state, renames);
     state.appPopups = [
       ...(stored.appPopups ?? []).filter((id) => present(Number(id))),

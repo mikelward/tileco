@@ -872,6 +872,28 @@ test("after a restart, a command ends the wait for windows that never came back"
   assert.equal(after.state.windows[12].ws, 1, "a window opened later is just new");
 });
 
+test("after a restart, a sync before Chrome restores any window keeps them all waiting", async () => {
+  const { chrome, tileco } = await setup([HD], [
+    on(HD, 1, { focused: true, url: "https://mail.google.com/" }),
+    on(HD, 2, { url: "https://github.com/" }),
+  ]);
+  await tileco.command("send-3");
+  // The browser restarts, and the worker wakes before any window is back.
+  chrome.wins = [];
+  chrome.sessionStore = {};
+  const after = new Tileco(chrome);
+  await after.event();
+  assert.equal(after.state.restoring[1].ws, 3, "Gmail's window waits for its return");
+  assert.equal(after.state.restoring[2].ws, 1, "and so does GitHub's");
+  chrome.open(on(HD, 21, { url: "https://github.com/", focused: true }));
+  chrome.open(on(HD, 22, { url: "https://mail.google.com/" }));
+  await after.event();
+  assert.equal(after.state.windows[22].ws, 3, "Gmail went back to workspace 3");
+  assert.equal(chrome.win(22).state, "minimized");
+  assert.equal(after.state.windows[21].ws, 1);
+  assert.equal(after.state.restoring, undefined, "nothing is left waiting");
+});
+
 test("closing every window one by one, then opening one, matches nothing", async () => {
   const { chrome, tileco } = await setup([HD], [on(HD, 1, { focused: true, url: "https://mail.google.com/" })]);
   await tileco.command("send-3");

@@ -1050,6 +1050,11 @@ Crostini runs kitty, the shell config and the terminal tools, so `conf` and
   to come back matches none of them, until your first
   command says the restore is over. Each joins the end of its workspace's
   stack.
+- The worker can wake before Chrome has restored any window. With no window
+  at all, the old ones wait too, unless this browser session has already had
+  a window: then you closed them all, and nothing waits. A flag in
+  `chrome.storage.session`, which a browser restart empties, tells the two
+  apart.
 
 ### 14.3 Cost and reliability
 
