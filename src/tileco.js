@@ -6,6 +6,7 @@
 import { DEFAULT_APPS } from "./apps.js";
 import { DEFAULT_SETTINGS, load as loadSettings } from "./settings.js";
 import { overlay } from "./dim.js";
+import { toggle as toggleKeepAwake } from "./keepawake.js";
 import { matchWindows, windowUrls } from "./restart.js";
 import * as geometry from "./geometry.js";
 import { unreadCount } from "./unread.js";
@@ -423,6 +424,10 @@ export class Tileco {
     if (name === "popup") return this.dashboard(display);
     if (name === "app-browser") return this.browser(display);
     if (name === "attention") return this.attention(display);
+    if (name === "keep-awake") {
+      await toggleKeepAwake(this.api);
+      return null;
+    }
     const app = this.apps.find((a) => a.command === name);
     if (app) return this.app(app, display);
     if (!tracked && name !== "layout-next" && name !== "layout-prev") return null;

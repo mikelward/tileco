@@ -14,7 +14,8 @@
   "permissions": [
     "storage",
     "system.display",
-    "scripting"
+    "scripting",
+    "power"
   ],
   "optional_permissions": [
     "tabs"
@@ -149,6 +150,9 @@
     },
     "send-9": {
       "description": "Send the window to workspace 9 (Search+Shift+9)"
+    },
+    "keep-awake": {
+      "description": "Toggle keep awake (Search+S)"
     },
     "app-browser": {
       "description": "Open a new browser window (Search+G)"

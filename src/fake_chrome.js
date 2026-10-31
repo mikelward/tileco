@@ -110,6 +110,17 @@ export class FakeChrome {
         return [{ result: undefined }];
       },
     };
+    // chrome.power's request: "display", "system" or null for none.
+    this.awake = null;
+    this.power = {
+      requestKeepAwake: (level) => {
+        fake.awake = level;
+      },
+      releaseKeepAwake: () => {
+        fake.awake = null;
+      },
+    };
+    this.actionTitle = "";
     this.badge = "";
     this.badgeColor = null;
     this.action = {
@@ -118,6 +129,9 @@ export class FakeChrome {
       },
       setBadgeBackgroundColor: async ({ color }) => {
         fake.badgeColor = color;
+      },
+      setTitle: async ({ title }) => {
+        fake.actionTitle = title;
       },
     };
     this.tabUpdates = [];

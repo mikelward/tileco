@@ -176,6 +176,33 @@ test("a click anywhere on the bar's chips or clocks reaches one", async () => {
   assert.deepEqual(errors, []);
 });
 
+test("the bar's cup turns keep awake on and off, and says which", async () => {
+  const { page, errors } = await open("src/launcher.html?mode=dashboard");
+  const cup = page.locator("#keep-awake");
+  await page.waitForSelector("#clocks li");
+  assert.equal(await cup.getAttribute("aria-pressed"), "false");
+  assert.equal(await cup.getAttribute("title"), "Not keeping awake");
+  await cup.click();
+  await page.waitForFunction(() => document.getElementById("keep-awake").getAttribute("aria-pressed") === "true");
+  assert.equal(await cup.getAttribute("title"), "Keeping awake");
+  assert.equal(await worker.evaluate(async () => (await chrome.storage.session.get("keepAwake")).keepAwake), true);
+  // Its target meets the clocks', so the gap between them is no dead click.
+  const gap = await page.evaluate(() => {
+    const c = document.getElementById("keep-awake").getBoundingClientRect();
+    const k = document.getElementById("clocks").getBoundingClientRect();
+    const out = [];
+    for (let x = Math.ceil(c.right); x < k.left; x++) {
+      const e = document.elementFromPoint(x, (c.top + c.bottom) / 2);
+      if (!e?.closest("#keep-awake, #clocks")) out.push(x);
+    }
+    return out;
+  });
+  assert.deepEqual(gap, [], "dead points between the cup and the clocks");
+  await cup.click();
+  await page.waitForFunction(() => document.getElementById("keep-awake").getAttribute("aria-pressed") === "false");
+  assert.deepEqual(errors, []);
+});
+
 test("without tab access, the dashboard opens on Launch and offers tab search", async () => {
   const { page, errors } = await open("src/launcher.html?mode=dashboard");
   await page.waitForSelector("#results li");

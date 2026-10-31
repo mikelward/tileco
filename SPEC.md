@@ -581,6 +581,7 @@ Bound by tileco, unless the column says the Shortcuts app:
 | `Ctrl+Shift+W` (tide: `Super+Backspace`) | close window | native Chrome |
 | `Search+Tab` | next window wanting attention, else the last window | tileco |
 | `Search+Shift+N` | notification center | Shortcuts app, if the action is editable *(unverified)* |
+| `Search+S` | toggle keep awake (§11), as the bar's cup does | tileco, once select to speak is removed (§7.2) |
 | `Search+Alt+M` | move to other display | native |
 | app letters (§9) | open or focus the app | tileco |
 
@@ -626,7 +627,7 @@ table:
 | Search+/ and Search+= on Dvorak (Search+[ and ] on QWERTY) | the desk to the left and right | keep; with one desk (§6.3) they do nothing, and tileco doesn't use them |
 | Search+Shift+A | assign the window to all desks | keep; tileco doesn't use it |
 | Search+D | dictation | remove it in the Shortcuts app, under Accessibility, to use Search+D |
-| Search+S | select to speak | keep; tileco doesn't use it |
+| Search+S | select to speak | remove it in the Shortcuts app, under Accessibility, for keep awake, as tide's and tilemo's `Super+S` *(untried: it may be locked)* |
 | Search+I | none | free; tileco's add-a-master key |
 
 The Shortcuts app's settings are in Settings › Keyboard and inputs ›
@@ -673,7 +674,7 @@ Search+Alt and Search+Ctrl are allowed too, and untried unless listed.
 | P | | | |
 | Q | | | |
 | R | | | |
-| S | OS: select to speak | | |
+| S | tileco: keep awake; OS select to speak, removable *(untried)* | | |
 | T | reserved: the terminal (§1) | | |
 | U | | | |
 | V | OS: clipboard history | | |
@@ -718,7 +719,7 @@ Instead:
 - **tileco's dashboard**, from `Search+Space` or the toolbar icon, is the home
   page's sibling (§6.2), full screen over the focused display: tide's bar on
   top (workspaces in tide's style — current, occupied, urgent, empty — the
-  layout symbol and the clocks) and the launcher (§9.4), opening on its
+  layout symbol, keep awake's cup (§11) and the clocks) and the launcher (§9.4), opening on its
   **Tabs** scope for switching. It closes once you choose, on Esc, when you
   click away, or on its key again. It doesn't use Chrome's action popup,
   which is small, anchored to the toolbar and refused where there's no
@@ -924,9 +925,25 @@ All native, set from the checklist (§3.4). tileco owns none of it.
     fixed by the OS *(unverified)*, so tide's 2:30 / 5:00 / 5:30 / 30:00
     timeline is approximated, not matched.
   - "Lock when sleeping" on, as tide locks before sleep.
-  - **Keep awake** is tileco's: a popup toggle that calls
-    `chrome.power.requestKeepAwake("display")` until you turn it off or log
-    out, like tide's. Meet already keeps the screen on by itself.
+  - **Keep awake** is tileco's: `Search+S`, a click on the cup on the
+    bar of the dashboard and the home page, or the launcher's Toggle keep
+    awake, calls `chrome.power.requestKeepAwake("display")` until you turn
+    it off, as tide's does. Meet already keeps the screen on by itself.
+    - The cup is a cup of coffee, tide's and tilemo's icon: faint while
+      off, in the accent color while on. Hovering it says "Keeping awake"
+      or "Not keeping awake", tide's words, and so does the toolbar
+      button's tooltip after each toggle.
+    - tide's OSD has no equivalent, so `Search+S` itself shows nothing
+      more: an extension's own notification would cost the
+      `notifications` permission's install warning.
+    - It lasts the browser session, in `storage.session`. A browser
+      restart, a login, drops Chrome's request and empties that store
+      together, so it's never left on across a login, as in tide.
+      Reloading or updating tileco does both too.
+    - tide's **presenter mode** (`Super+P`) isn't here: it's keep awake
+      plus Do not disturb, and an extension can't reach chromeOS's Do not
+      disturb, so it would be keep awake under another name. tide's mic
+      hold has no equivalent either; Meet keeps the screen on itself.
 - **Screenshots**: Ctrl+Show windows for the screen, Ctrl+Shift+Show
   windows for the capture tool's window and region modes. Shots are copied
   to the clipboard and saved to Downloads, as tide saves to
@@ -1009,10 +1026,10 @@ Crostini runs kitty, the shell config and the terminal tools, so `conf` and
 
 - MV3, service worker background, minimum Chrome version set to the M2
   device's.
-- Permissions: `storage`, `system.display`, `scripting`, none with an
-  install warning, so tiling and workspaces need nothing sensitive.
-  (`power` for keep-awake and `management` for installed apps, if §9.1
-  holds, would join them.)
+- Permissions: `storage`, `system.display`, `scripting` and `power` (keep
+  awake, §11), none with an install warning, so tiling and workspaces need
+  nothing sensitive. (`management` for installed apps, if §9.1 holds,
+  would join them.)
 - Optional, each asked for from a click under **Extras** at the top of the
   settings, which a new install opens once. The dashboard also shows a
   card offering the extras still off, with an Allow button each, until
@@ -1100,7 +1117,7 @@ development only. That shapes the design *(Web Store policy, secondary)*:
   belong to it as the desktop around the tiles; the listing says so.
 - **Every permission is justified in the listing** (PUBLISHING.md):
   `system.display` for layout, `scripting` for unread counts and dimming,
-  and, optional and asked for at runtime, `tabs`, each unread-count site,
+  `power` for keep awake, and, optional and asked for at runtime, `tabs`, each unread-count site,
   and all sites for dimming (§14.1). So the install shows no warning, and
   review stays simpler.
 - **No remote code** and no network calls, which MV3 requires anyway.
